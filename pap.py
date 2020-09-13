@@ -273,6 +273,32 @@ def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter):
     print(f"Fitwahrscheinlichkeit = {fit_wahrscheinlichkeit:.1f}%")
     
     
+
+    
+def chi_quadrat_odr(fitfunktion, parameter, messpunkte, messfehler):
+    x_werte = np.linspace(messpunkte[0][0] - 10 * messfehler[0][0], 
+                          messpunkte[0][-1] + 10 * messfehler[0][-1], 10000000)
+    fitwerte = fitfunktion(x_werte, *parameter)
+    
+    abstände_alle = np.linalg.norm(arr([(messpunkte[0][:, np.newaxis] - x_werte) 
+                                        / messfehler[0][:, np.newaxis], 
+                                        (messpunkte[1][:, np.newaxis] - fitwerte) 
+                                        / messfehler[1][:, np.newaxis]]), axis = 0)
+    abstände_min = np.min(abstände_alle, axis = 1)
+    
+    anzahl_parameter = len(parameter)
+    anzahl_messwerte = np.shape(messpunkte)[1]
+    
+    chi_quadrat = np.sum(abstände_min**2)
+    freiheitsgrade = anzahl_messwerte - anzahl_parameter
+    chi_quadrat_reduziert = chi_quadrat / freiheitsgrade 
+    fit_wahrscheinlichkeit = (1 - chi2.cdf(chi_quadrat, freiheitsgrade)) * 100
+
+    print(f"χ^2_reduziert         = {chi_quadrat_reduziert:.2f}") 
+    print(f"Fitwahrscheinlichkeit = {fit_wahrscheinlichkeit:.1f}%")
+    
+    
+    
     
     
 # Funktionen
@@ -336,7 +362,6 @@ def poly_func(x, parameter):
     polynomglieder = (parameter.T * x_potenzen.T).T               # (a_i x^i), Trafo nötig um numpy broadcasting zu ermöglichen   
     
     return np.sum(polynomglieder, axis = 0)
-
 
 
 
