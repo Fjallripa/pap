@@ -11,6 +11,7 @@ from tabulate import tabulate
 
 
 
+
 # Fehlerrechnung
 
 def summen_fehler(fehler_array):
@@ -76,6 +77,7 @@ def fwhm(sigma):
     '''
     
     return 2 * np.sqrt(2 * np.log(2)) * sigma
+
 
 
 
@@ -273,19 +275,76 @@ def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter):
     print(f"Fitwahrscheinlichkeit = {fit_wahrscheinlichkeit:.1f}%")
     
     
-
     
-def chi_quadrat_odr(fitfunktion, parameter, messpunkte, messfehler):
-    x_werte = np.linspace(messpunkte[0][0] - 10 * messfehler[0][0], 
-                          messpunkte[0][-1] + 10 * messfehler[0][-1], 10000000)
+    
+def chi_quadrat_odr(fitfunktion, messpunkte, messfehler, parameter = arr([])):
+    '''
+    Printet den χ^2_reduziert-Wert und die Fitwahrscheinlichkeit für Messwerte mit sowohl 
+    y- als auch x-Fehler.
+    
+    
+    Parameter
+    ---------
+    fitfunktion : function  (nur |R -> |R)
+    
+    messpunkte : np.ndarray (2D, mit number-like Elementen)
+        Muss die Form haben np.array([[Liste von x-Werten], [Liste von y-Werten]])
+    
+    messfehler : np.ndarray ((2D, mit number-like Elementen > 0)
+        Muss die Form haben np.array([[Liste von x-Fehlern], [Liste von y-Fehlern]])
+        Wenn ein Fehlerwert nicht > 0 ist, stoppt die Funktion und printet eine Fehlermeldung
+    
+    parameter : np.ndarray  (1D, mit number-like Elementen)), optional
+        Liste der parameter der Fitfunktion.
+        
+    
+    Beispiel
+    --------
+    >>> messpunkte = np.array([[0.9, 2.3, 4.5], [-2.0, -4.3, -8.6]])
+    >>> messfehler = np.array([[0.1, 0.05, 0.08], [0.1, 0.4, 0.3]])
+    >>> pap.chi_quadrat_odr(pap.prop_func, messpunkte, messfehler, np.array([-2]))
+    χ^2_reduziert         = 1.36
+    Fitwahrscheinlichkeit = 25.7%
+    
+    
+    Funktionsprinzip
+    ----------------
+    Im normalen χ^2-Test (pap.chi_quadrat_test()) wird nur der (fehlernormierte) y-Abstand von Messwert 
+    und Fitfunktion für den χ^2-Wert berechnet. Hier wird stattdessen der Abstand zu dem dem Messpunkt 
+    nächstgelegen Punkt der Funktion berechnet, normiert auf sowohl x- als auch y-Fehler des 
+    Messpunktes. Um dies mit hinreichender Genauigkeit zu ermöglichen, werden so viele Funktionspunkte 
+    berechnet, dass 10 von ihnen auf die Länge des kleinsten x-Fehlers passen. 
+    '''
+    
+    
+    
+    # Anzahl x-Werte bestimmen
+    if messfehler[messfehler <= 0].size != 0:
+        print('messfehler darf keine Fehler enthalten, die 0 oder negativ sind!')
+        return
+    
+    x_wert_min = messpunkte[0][0] - 10 * messfehler[0][0]   # x-Wert Unter- und
+    x_wert_max = messpunkte[0][-1] + 10 * messfehler[0][-1]   # Obergrenze
+    x_fehler_min = np.min(messfehler[0])   # Kleinster x_Fehler
+    anzahl_x_werte = np.int((x_wert_max - x_wert_min) / x_fehler_min * 10)
+    
+    anzahl_max = np.int(1e7)   # Obergrenze von 10 Mio. Punkten um max. Rechenzeit zu begrenzen
+    if anzahl_x_werte > anzahl_max:
+        anzahl_x_werte = anzahl_max
+        
+    x_werte = np.linspace(x_wert_min, x_wert_max, anzahl_x_werte)
     fitwerte = fitfunktion(x_werte, *parameter)
     
+    
+    # Abstandsberechnung normiert auf die Messfehler
     abstände_alle = np.linalg.norm(arr([(messpunkte[0][:, np.newaxis] - x_werte) 
                                         / messfehler[0][:, np.newaxis], 
                                         (messpunkte[1][:, np.newaxis] - fitwerte) 
                                         / messfehler[1][:, np.newaxis]]), axis = 0)
     abstände_min = np.min(abstände_alle, axis = 1)
     
+    
+    # χ^2- und Fitwahrscheinlichkeits-Berechnung
     anzahl_parameter = len(parameter)
     anzahl_messwerte = np.shape(messpunkte)[1]
     
@@ -299,6 +358,7 @@ def chi_quadrat_odr(fitfunktion, parameter, messpunkte, messfehler):
     
     
     
+
     
     
 # Funktionen
