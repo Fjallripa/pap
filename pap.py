@@ -5,7 +5,9 @@
 import numpy as np
 from numpy import array as arr
 from scipy.stats import chi2
+from scipy import odr
 from tabulate import tabulate
+
 
 
 
@@ -81,6 +83,7 @@ def fwhm(sigma):
 
 
 
+
 # Ergebnisse anzeigen
 
 ## Für resultat() benötigte Funktionen
@@ -115,11 +118,11 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
     Titel, definierter Präzision, evt. +/- Fehler, Einheit und evt. relativen Fehler.
     
     
-    Parameter
+    Argumente
     ---------
     titel : str
     
-    werte : number-like, np.ndarray (1D, mit number-like Elementen)
+    werte : number_like, np.ndarray (1D, mit number_like Elementen)
         Darf die Formen haben 
         ein_wert, np.array([ein_wert]),
         np.array([ein_wert, sein_fehler]) oder 
@@ -127,13 +130,13 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
     
     einheit : str
     
-    faktor : number-like, optional
+    faktor : number_like, optional
         Ermöglicht Anpassung an Größenordnung und Einheit.
     
     nachkommastellen : int, optional
         Siehe "Rundung des Ergebnisses".
     
-    rel_fehler : bool, number-like, optional
+    rel_fehler : bool, number_like, optional
         darf False sein     (aus),
              True sein      (wenn Fehler vorhanden und ein_wert != 0,
                              dann wird dieser als sein_fehler / ein_wert bzw. als
@@ -145,22 +148,22 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
     Beispiele
     ---------
     >>> pap.resultat('Abweichung', 0.30304, '%', faktor = 1e2, nachkommastellen = 0)
-    Abweichung: 30 %
+      Abweichung: 30 %
     
     >>> pap.resultat('Arbeit', np.array([3.35e6, 0.46e6]), 'MJ', faktor = 1e-6)
-    Arbeit: 3.4 +/- 0.5 MJ
+      Arbeit: 3.4 +/- 0.5 MJ
     
     >>> pap.resultat('Beschleunigung', np.array([9.8493, 0.0424, 0.1235]), 'm/s^2')
-    Beschleunigung: 9.85 +/- 0.04(sys) +/- 0.12 (stat) m/s^2
+      Beschleunigung: 9.85 +/- 0.04(sys) +/- 0.12 (stat) m/s^2
     
     
     mit relativem Fehler:
     
     >>> pap.resultat('Arbeit           ', np.array([3.3423, 0.4679]), 'J', rel_fehler = True)
-    Arbeit           : 342 +/- 5 J   (1.6 %)
+      Arbeit           : 342 +/- 5 J   (1.6 %)
     
     >>> pap.resultat('Fehler der Arbeit', 0.4679, 'J', rel_fehler = 1.6)
-    Fehler der Arbeit: 5 J   (1.6 %)
+      Fehler der Arbeit: 5 J   (1.6 %)
                     
     
     Rundung der Ergebnisse
@@ -254,25 +257,268 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
               .format(*wertepaar, einheit, rel_fehler_string, prec = nachkommastellen))
         
 
+
+        
+        
+# Funktionen fitten und χ^2-Tests machen
+        
+def odr_fit(funktion, messpunkte, messfehler, parameter0, 
+            print_resultate = True, output_chi_test = False, funktionstyp = 'x, *p'):
+    '''
+    Orthogonal Distance Regression - Fittet eine 1D-Funktion an fehlerbehaftete Messdaten an. Im Gegensatz 
+    zu curve_fit() aus scipy.stats werden hier auch Fehler in der x-Achse berücksichtigt. Eigentlich wird 
+    hier nur das scipy.odr-Paket in einer einfach zu bedienenden aber optionsärmeren Funktion verpackt.
+    
+    Optional werden die Fit-Resultate angezeigt und returned, ebenso ein optionaler χ^2-Test.
+    
+    
+    Argumente
+    ---------
+    funktion : function
+        Erlaubt sind mathematische |R -> |R Funktionen. Folgende Argumente-Reihenfolgen sind unterstützt:
+        funktion(x, *parameter)  also bspw. pap.quad_func(x, a, b, c)
+        funktion(x, parameter)   parameter : array_like
+        funktion(parameter, x)   parameter : array_like
+        Der verwendete Typ muss unter  funktionstyp  angegeben werden.
+    
+    messpunkte : np.array (2D, mit number_like Elementen)
+        Form: np.array([x_werte_liste, y_werte_liste])
+    
+    messfehler : np.array (2D, mit number_like Elementen > 0)
+        Form: np.array([x_fehler_liste, y_fehler_liste])
+    
+    Natürlich müssen alle vier Listen gleich lang sein.
+    
+    parameter0 : array_like (1D, mit number_like Elementen)
+        Erste Schätzung, für was die gefitteten Parameter sein sollen.
+        Achtung! Eine schlechte Schätzung kann dazu führen, dass der Fit schief läuft.
+    
+    print_resultate : bool, optional
+        Bei  True  wird eine Zusammenfassung der Fitergebnisse geprintet (pprint() aus scipy.odr),
+        siehe  Beispiele  und  Bedeutung des Fit-Resultates.
+        Bei  False  wird nichts geprintet.
+    
+    output_chi_test : bool, string, optional
+        Bei  False  wird der χ^2-Wert des Fits nicht returned,
+        bei  True  schon.
+        Bei  'print'  wird ein χ^2-Test direkt ausgeführt und geprintet (pap.chi_quadrat_odr()),
+        siehe  Beispiele  und Dokumentation von  pap.chi_quadrat_odr()
+    
+    funktionstyp : string, optional
+        Ist standardmäßig auf  'x, *p',  also die Form  funktion(x, *parameter)  eingestellt.
+        Wähle  'x, p_list'  für Form  funktion(x, parameter)
+        oder   'p_list, x'  für Form  funktion(parameter, x).
+    
+    
+    Output
+    ------
+    parameter : np.array (1D, float Elemente)
+        Liste der Parameter der gefitteten Funktion
+    
+    paramter_fehler : np.array (1D, float Elemente)
+        Liste von deren 1σ-Fehlern (Standardabweichungen)
+    
+    chi_quadrat_liste : list, optional
+        Besteht aus 
+        chi_quadrat : float, 
+        anzahl_messwerte : int,
+        anzahl_parameter : int
+        Kann man direkt in  pap.chi_quadrat_odr()  einfügen, siehe  Beispiele.
+        
+    
+    Beispiele
+    ---------
+    Hier werden sowohl Fit-Resultate als auch χ^2-Wert angezeigt:
+    >>> messpunkte = np.array([[0.9, 2.3, 4.5], [-2.0, -4.3, -8.6]])
+    >>> messfehler = np.array([[0.1, 0.05, 0.08], [0.1, 0.4, 0.3]])
+    >>> parameter_schätz  = [-2]
+    >>> parameter, parameter_fehler = pap.odr_fit(pap.prop_func, messpunkte, messfehler, 
+                                                  parameter_schätz,output_chi_test = 'print')
+      Ergebnisse des ODR-Fits:
+
+      Beta: [-1.93158386]
+      Beta Std Error: [0.05977981]
+      Beta Covariance: [[0.00435563]]
+      Residual Variance: 0.8204606240877614
+      Inverse Condition #: 1.0
+      Reason(s) for Halting:
+        Sum of squares convergence
+
+
+      Ergebnisse des χ^2-Tests:
+
+      χ^2_reduziert         = 0.82
+      Fitwahrscheinlichkeit = 44.0%
+    
+    
+    Hier ohne Prints aber mit χ^2-Output:
+    >>> output = pap.odr_fit(pap.poly_func, messpunkte, messfehler, parameter_schätz, 
+                             print_resultate = False, output_chi_test = True, funktionstyp = 'x, p_list')
+    >>> parameter, parameter_fehler, chi_quadrat_liste = output
+    
+    Damit kann man dann den χ^2-Test separat ausführen:
+    >>> pap.chi_quadrat_odr(*chi_quadrat_liste)
+      Ergebnisse des χ^2-Tests:
+
+      χ^2_reduziert         = 0.82
+      Fitwahrscheinlichkeit = 44.0%
+    
+    
+    Bedeutung des Fit-Resultates
+    ----------------------------
+      * "Beta" und "Beta Std Error" sind jeweils die Parameter und deren 1σ-Fehler der gefitteten 
+        Funktion. Sie heißen im Output  parameter  und  parameter_fehler.
+      * "Beta Covariance" ist die Kovarianz-Matrix der Parameter.
+      * "Residual Variance" ist der reduzierte χ^2-Wert des Fits. Er taucht auch im Ergebnis des χ^2-Testes
+        auf.
+      * "Reason(s) for Halting" kann Gründe angeben, warum ein Fit schiefgelaufen ist. 
+        "Sum of squares convergence" bedeutet, dass die Optimierfunktion auf einen bestimmten Wert 
+        konvergiert ist. Bedeutet aber nicht notwendigerweise, dass die die gefunden Parameter sinnvoll 
+        sind, dies sieht man besser mit einem Plot
+    '''
+    
+    
+    
+    # Überprüfen und Anpassen der Argumente
+    x_werte,  y_werte  = messpunkte
+    x_fehler, y_fehler = messfehler
+    
+    if messfehler[messfehler == 0].size != 0:
+        print('messfehler darf keine Fehler enthalten, die 0 sind!')
+        return
+    
+    def funktion_kompatibel(parameter, x):
+        if funktionstyp == 'x, *p':
+            return funktion(x, *parameter)
+        elif funktionstyp == 'x, p_list':
+            return funktion(x, parameter)
+        elif funktionstyp == 'p_list, x':
+            return funktion(parameter, x)
+        else:
+            print('funktionstyp ist falsch angegeben. >:(')
+            return
+    
+    
+    # Berechnung des Fits
+    modell_funktion = odr.Model(funktion_kompatibel)
+    messdaten       = odr.RealData(x_werte, y_werte, x_fehler, y_fehler)
+    regression      = odr.ODR(messdaten, modell_funktion, beta0 = parameter0)
+    ergebnis        = regression.run()
+    
+    
+    # Einstellen des Outputs und Print-Inhaltes
+    return_list = []
+    return_list.append(ergebnis.beta)
+    return_list.append(ergebnis.sd_beta)
+    
+    if print_resultate == True:
+        print('Ergebnisse des ODR-Fits:\n')
+        ergebnis.pprint()
+        
+    if output_chi_test != False:
+        chi_quadrat = ergebnis.sum_square
+        anzahl_messwerte = np.shape(messpunkte)[1]
+        anzahl_parameter = len(ergebnis.beta)
+        chi_test_list = [chi_quadrat, anzahl_messwerte, anzahl_parameter]
+        if output_chi_test == True:
+            return_list.append(chi_test_list)
+        elif output_chi_test == 'print':
+            print('\n')
+            chi_quadrat_odr(*chi_test_list)
+    
+    return return_list
+
+
+        
+        
+def _chi_quadrat_print(chi_quadrat, anzahl_messwerte, anzahl_parameter):
+    '''
+    Berechnet χ^2_reduziert und die Fitwahrscheinlichkeit und printet sie als schönes Ergebnis.
+    '''
+    
+    freiheitsgrade         = anzahl_messwerte - anzahl_parameter
+    chi_quadrat_reduziert  = chi_quadrat / freiheitsgrade 
+    fit_wahrscheinlichkeit = (1 - chi2.cdf(chi_quadrat, freiheitsgrade)) * 100
+    
+    print('Ergebnisse des χ^2-Tests:\n')
+    print(f"χ^2_reduziert         = {chi_quadrat_reduziert:.2f}") 
+    print(f"Fitwahrscheinlichkeit = {fit_wahrscheinlichkeit:.1f}%")
+        
+
         
         
 def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter): 
     '''
     Printet den χ^2_reduziert-Wert und die Fitwahrscheinlichkeit.
-    fit_werte sind die Werte, die die Fitfunktion ausgibt.
-    Also: fit_werte = fit_func(x_werte, *parameter)
+    
+    Argumente
+    ---------
+    fit_werte: np.array (1D, number_like)
+        die Werte, die die Fitfunktion ausgibt, also  fit_werte = fit_func(x_werte, *parameter)
+    
+    werte: np.array (1D, number_like)
+        y-Werte der Messdaten
+    
+    werte_fehler: np.array (1D, number_like)
+        y-Fehler der Messdaten
+    
+    anzahl_parameter : int (> 0)
+        Anzahl Parameter der Fitfunktion
+        
+        
+    Beispiele
+    ---------
+    >>> x_werte = np.array([-8, -5.5, -1.2, 1, 1.4, 3.2, 4.5])
+    >>> y_werte = np.array([40, 20.8, 3.1, 0.5, 1.5, 3, 6])
+    >>> y_fehler = np.array([0.5, 0.73, 0.42, 0.23, 0.23, 0.41, 0.44])
+    >>> fitparameter = [0.46721214, -1.01681483, 1.45102103]
+    >>> pap.chi_quadrat_test(pap.quadfunc(x_werte, *fitparameter), y_werte, y_fehler, 3)
+      Ergebnisse des χ^2-Tests:
+
+      χ^2_reduziert         = 2.79
+      Fitwahrscheinlichkeit = 2.5%
     '''
     
     
-    chi_quadrat = np.sum(((fit_werte - werte) / werte_fehler)**2) 
-    freiheitsgrade = len(werte) - anzahl_parameter
-    chi_quadrat_reduziert = chi_quadrat / freiheitsgrade 
-    fit_wahrscheinlichkeit = (1 - chi2.cdf(chi_quadrat, freiheitsgrade)) * 100
+    chi_quadrat = np.sum(((fit_werte - werte) / werte_fehler)**2)
     
-    print(f"χ^2_reduziert         = {chi_quadrat_reduziert:.2f}") 
-    print(f"Fitwahrscheinlichkeit = {fit_wahrscheinlichkeit:.1f}%")
+    _chi_quadrat_print(chi_quadrat, len(werte), anzahl_parameter)
     
     
+    
+ 
+def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
+    '''
+    Printet den χ^2_reduziert-Wert und die Fitwahrscheinlichkeit für einen ODR-Fit (siehe pap.odr_fit()).
+    Die drei Input-Argumente kann man sich von der pap.odr_fit-Funktion mithilfe der Angabe
+    output_chi_test = True  als drittes Output-Argument geben lassen.
+    
+    Argumente
+    ---------
+    chi_quadrat : float (> 0)
+    
+    anzahl_messwerte : int (> 0)
+
+    anzahl_parameter : int (> 0)
+    
+    
+    Beispiel
+    --------
+    >>> parameter, parameter_fehler, chi_test_liste = pap.odr_fit(... Argumente ..., output_chi_liste = True)
+    ... Geprintetes Ergebnis vom ODR-Fit ...
+    >>> pap.chi_quadrat_ord(*chi_test_liste)
+    Ergebnisse des χ^2-Tests:
+    
+    χ^2_reduziert         = 0.82
+    Fitwahrscheinlichkeit = 44.0%
+    '''
+    
+    
+    _chi_quadrat_print(chi_quadrat, anzahl_messwerte, anzahl_parameter)
+    
+    
+    
+
     
     
 # Funktionen
@@ -336,7 +582,6 @@ def poly_func(x, parameter):
     polynomglieder = (parameter.T * x_potenzen.T).T               # (a_i x^i), Trafo nötig um numpy broadcasting zu ermöglichen   
     
     return np.sum(polynomglieder, axis = 0)
-
 
 
 
