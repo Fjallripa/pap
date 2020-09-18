@@ -95,7 +95,8 @@ def _rundung(werte, nachkommastellen:int):
     '''
     
     if nachkommastellen <= 0:
-        return np.int_(np.round(werte, nachkommastellen))
+        return np.int_(np.round(werte, nachkommastellen))   # np.int_  um die Werte eines Arrays  
+                                                            # zu int zu konvertieren
     else:
         return np.round(werte, nachkommastellen)
 
@@ -142,7 +143,7 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
                              dann wird dieser als sein_fehler / ein_wert bzw. als
                              (quadratische summe von sys- und stat_fehler) / ein_wert
                              berechnet.), oder
-             eine Zahl sein (diese wird dann direkt angegeben)
+             eine Zahl sein (Einheit Prozent; diese wird dann direkt angegeben)
     
     
     Beispiele
@@ -205,8 +206,8 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
             rel_fehler = summen_fehler(fehler) / werte[0] * 100   # [%], relativer Fehler des Gesamtfehlers
     
     if not _istbool(rel_fehler, False):
-        # falls rel_fehler eine Zahl ist, wird mit dieser weitergerechnet, 
-        # ansonsten ensteht hier gleich ein Fehler.
+        # falls rel_fehler eine Zahl ist, wird mit dieser weitergerechnet, bei False nicht. 
+        # In anderen Fällen ensteht hier gleich ein Fehler.
         
         # Rundung auf 2 signifikanten Stellen 
         rel_fehler = np.abs(np.float64(rel_fehler))
@@ -451,6 +452,7 @@ def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter):
     '''
     Printet den χ^2_reduziert-Wert und die Fitwahrscheinlichkeit.
     
+    
     Argumente
     ---------
     fit_werte: np.array (1D, number_like)
@@ -466,8 +468,8 @@ def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter):
         Anzahl Parameter der Fitfunktion
         
         
-    Beispiele
-    ---------
+    Beispiel
+    --------
     >>> x_werte = np.array([-8, -5.5, -1.2, 1, 1.4, 3.2, 4.5])
     >>> y_werte = np.array([40, 20.8, 3.1, 0.5, 1.5, 3, 6])
     >>> y_fehler = np.array([0.5, 0.73, 0.42, 0.23, 0.23, 0.41, 0.44])
@@ -492,6 +494,7 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
     Printet den χ^2_reduziert-Wert und die Fitwahrscheinlichkeit für einen ODR-Fit (siehe pap.odr_fit()).
     Die drei Input-Argumente kann man sich von der pap.odr_fit-Funktion mithilfe der Angabe
     output_chi_test = True  als drittes Output-Argument geben lassen.
+    
     
     Argumente
     ---------
