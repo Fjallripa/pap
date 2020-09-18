@@ -86,19 +86,107 @@ def fwhm(sigma):
 
 # Ergebnisse anzeigen
 
-## Für resultat() benötigte Funktionen
-
-def _rundung(werte, nachkommastellen:int):
+def _rundung_einzel(wert, präzision):
     '''
-    Rundet werte auf eine Anzahl nachkommastellen.
-    werte soll eine Numpy-Zahl oder -Array sein.
+    Die Rundung mit einem Array von Nachkommastellen  (präzisionen)  funktioniert deshalb, da in rekursiven
+    for-Loops die Arrays in einzelne Elemente aufgebrochen werden, welche dann gerundet werden.
+    
+    
+    Argumente (sollten schon durch  _rundung()  passend gemacht worden sein.)
+    ---------
+    werte : np.ndarray (number_like), number_like
+    
+    präzisionen : np.ndarray (int), int
+    
+    
+    Output
+    ------
+    wert_gerundet : np.ndarray (number_like), number_like
+        Mit Pythons  round()  auf nächste gerade Ziffer gerundet (symmetrisches Runden).
+        Form und Elemente sonst gleich wie  werte.
     '''
     
-    if nachkommastellen <= 0:
-        return np.int_(np.round(werte, nachkommastellen))   # np.int_  um die Werte eines Arrays  
-                                                            # zu int zu konvertieren
-    else:
-        return np.round(werte, nachkommastellen)
+    
+    
+    anzahl_dimensionen = np.ndim(wert)   # Entsprechend viele Rekursionen werden stattfinden.
+    
+    # Eigentliche Rundung
+    if anzahl_dimensionen == 0:
+        wert_gerundet = round(wert, präzision)
+    
+    # Aufrufen von  _rundung_einzel()  um in einem for-Loop die Elemente von werte abzuarbeiten.
+    elif anzahl_dimensionen > 0:
+        wert_form = np.shape(wert)
+        wert_gerundet = np.zeros(wert_form)
+        for i in range(wert_form[0]):
+            wert_gerundet[i] = _rundung_einzel(wert[i], präzision[i])
+            
+    return wert_gerundet   # Die gesammelten gerundeten Werte werden als Ergebnis zur vorigen Funktion
+                           # zurückgeschickt.
+    
+    
+    
+
+def _rundung(werte, präzisionen):
+    '''
+    Rundet  werte  auf ihre jeweilige Anzahl Nachkommastellen  (präzisionen).
+    Im Gegensatz zu  np.round()  kann diese Funktion  werte  mit ganzen Arrays von Nachkommastellen runden.
+    Für Details zum Rundungsprozess siehe  _rundung_einzel().
+    
+    
+    Argumente
+    ---------
+    werte : np.ndarray (number_like), number_like
+        Kann beliebige Form haben und auch Einzelwert sein.
+    
+    präzisionen : np.ndarray (int), int
+        Muss gleiche Form wie  werte  haben oder int sein.
+    
+    
+    Output
+    ------
+    "wert_gerundet" : np.ndarray (number_like), number_like
+        Mit Pythons  round()  auf nächste gerade Ziffer gerundet (symmetrisches Runden).
+        Form und Elemente sonst gleich wie  werte.
+    '''
+    
+    
+    
+    # Überprüfung und Anpassung der Argumente
+    präzisionen = arr(präzisionen)  # Falls Einzelwert
+    if präzisionen.dtype != int:
+        print('präzisionen darf nur Integers enthalten!')
+        print('Die Anzahl Stellen, auf die gerundet wird, kann nur ganzzahlig sein.')
+    
+    if np.shape(werte) != np.shape(präzisionen):
+        if np.ndim(präzisionen) == 0:   # Falls  präzisionen  Einzelwert, dann wird
+                                        # daraus ein Array derselben Form wie  werte  gemacht.
+            präzisionen = np.full(np.shape(werte), präzisionen)
+        else:
+            print('werte und präzisionen müssen die gleiche np.shape haben!')
+            print('np.shape(werte) =', np.shape(werte))
+            print('np.shape(präzisionen) =', np.shape(präzisionen))
+    
+    
+    # Eigentlicher Rundungsprozess
+    return _rundung_einzel(werte, präzisionen)
+
+
+
+
+def _negativ_wird_null(array):
+    '''
+    "Rampenfunktion": Die Werte von array, die negativ sind, werden durch 0 ersetzt.
+    
+    
+    Argument
+    --------
+    array : np.ndarray (number_like)
+    '''
+    
+    
+    nullen = np.full(np.shape(array), 0)
+    return np.where(array > 0, array, nullen)
 
 
     
@@ -220,7 +308,16 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
         rel_fehler = _rundung(rel_fehler, präzision)
         
         # Vorbereitung des Relativer-Fehler-Strings
-        rel_fehler_string = f'   ({rel_fehler} %)'
+        präzision = _negativ_wird_null(präzision)   # Keine negativen Werte für format(prec=) erlaubt.
+        if rel_fehler != 0:
+            if größenordnung > -5:   # Sehr kleine Werte sehen besser mit e aus.
+                rel_fehler_string = '   ({:.{prec}f} %)'.format(rel_fehler, prec = präzision)
+            else:
+                rel_fehler_string = '   ({:.1f}e{} %)'.format(rel_fehler * 10**(-größenordnung),
+                                                              größenordnung, prec = präzision)
+        else:
+            rel_fehler_string = f'   ({rel_fehler} %)'
+    
     else:
         rel_fehler_string = ''
         
@@ -242,8 +339,8 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
     
     # Rundung entsprechend der signifikante Stelle oder der eigenen Vorgabe
     wertepaar = _rundung(werte, nachkommastellen)
-    if nachkommastellen <= 0:   # Um Fehler bei der String-Formatierung zu vermeiden.
-        nachkommastellen = 0
+    nachkommastellen = _negativ_wird_null(nachkommastellen)   # Keine negativen Werte für 
+                                                              # format(prec=) erlaubt.
     
     
     # Print des Ergebnis-Strings
@@ -259,6 +356,7 @@ def resultat(titel, werte, einheit = '', faktor = 1, nachkommastellen = None, re
         
 
 
+        
         
         
 # Funktionen fitten und χ^2-Tests machen
