@@ -174,6 +174,44 @@ def _rundung(werte, präzisionen):
 
 
 
+def _größenordnung(zahlen, art = int):
+    if art == int:
+        art = 'int64'
+    elif art == float:
+        art = 'float64'
+    einsen = np.ones(np.shape(zahlen))   # 1 hat Größenordnung 0 (welches auch 0 hier haben soll).
+    zahlen_kompatibel = np.where(zahlen == 0, einsen, zahlen)
+    return arr(np.floor(np.log10(np.abs(zahlen_kompatibel))), dtype = art)
+
+
+
+
+def _erste_ziffer(zahlen, art = float):
+    größenordnungen = _größenordnung(zahlen, art = float)
+    ziffern = np.abs(zahlen / 10**größenordnungen)
+    if art == float:
+        return ziffern
+    if art == int:
+        return np.int_(ziffern)
+    
+    
+    
+
+def _nachkommastelle(zahlen, sig_stellen = 1, sig_grenze = 1.0):
+    
+    über_der_grenze = _erste_ziffer(zahlen) >= sig_grenze
+    sig_stellen_normal = np.full(np.shape(zahlen), sig_stellen)
+    signifikante_stellen = np.where(über_der_grenze, sig_stellen_normal, sig_stellen_normal + 1)
+    größenordnungen = _größenordnung(zahlen, art = float)
+    
+    nachkommastellen = -größenordnungen + signifikante_stellen - 1
+    
+    
+    return nachkommastellen
+
+
+
+
 def _negativ_wird_null(array):
     '''
     "Rampenfunktion": Die Werte von array, die negativ sind, werden durch 0 ersetzt.
@@ -196,7 +234,143 @@ def _istbool(wert, bool_wert:bool):
     Überprüft ob wert wirklich bool_wert (True oder False) ist und nicht nur 1 oder 0.
     '''
     
-    return (wert == bool_wert and isinstance(wert, bool))    
+    return (wert == bool_wert and isinstance(wert, bool))
+
+
+
+def _listen_transponieren(listen_matrix):
+    transponierte_matrix = []
+    for i in range(len(listen_matrix[0])):
+        zeile = []
+        for j in range(len(listen_matrix)):
+            zeile.append(listen_matrix[j][i])
+        transponierte_matrix.append(zeile)
+    return transponierte_matrix
+
+
+
+
+def _füllen(string, index = 0,  menge = 1, füllzeichen = ' '):
+    if index == 'rechts':
+        index = len(string)
+    elif index == 'links':
+        index = 0
+    string_neu = string[:index] + füllzeichen * menge + string[index:]
+    return string_neu
+
+
+
+
+def _entfernen(string, index, länge = 1):
+    
+    return string[:index] + string[(index + länge):]
+
+
+
+
+def _zentrieren_rechts(string, länge_gewünscht, füllzeichen = ' '):
+    länge_string = len(string)
+    if länge_gewünscht <= länge_string:
+        return string
+    else:
+        füll_länge        = länge_gewünscht - länge_string
+        füll_länge_links  = int(np.ceil(füll_länge / 2))
+        füll_länge_rechts = int(np.floor(füll_länge / 2))
+        string_zentriert  = füllzeichen * füll_länge_links + string + füllzeichen * füll_länge_rechts
+        return string_zentriert
+    
+    
+    
+
+def _zahlen_ausrichtung(zahlen_liste):
+    
+    länge_abs = len(zahlen_liste)
+    test_zahl    = [any(x in string for x in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']) 
+                    for string in zahlen_liste]
+    nicht_zahlen = [(i, zahlen_liste.pop(i))  for i in reversed(range(länge_abs))  if not test_zahl[i]][::-1]
+        # Pflückt alle nicht-Zahlen von hinten nach vorne aus der zahlen_liste um deren richtige Indices zu 
+        # bewahren.
+    
+    if len(zahlen_liste) != 0:
+        länge_abs = len(zahlen_liste)
+        anzahl = 9   #% (minus, vor_komma, komma, nach_komma, e, e-, nach_e, text, ende)
+
+        test_minus   = ['-' in string[0] for string in zahlen_liste]
+        test_komma   = ['.' in string for string in zahlen_liste]
+        test_e       = ['e' in string for string in zahlen_liste]
+        test_e_minus = ['e-' in string for string in zahlen_liste]
+        test_text    = [' ' in string for string in zahlen_liste]
+        längen_strings = [len(string) for string in zahlen_liste]
+        indices = np.int_(np.zeros((länge_abs, anzahl)))
+
+
+        for i in range(länge_abs):
+            indices[i][-1] = längen_strings[i]
+            if test_text[i]:
+                indices[i][7] = zahlen_liste[i].find(' ')
+            else:
+                indices[i][7] = indices[i][-1]
+            if test_e[i]:
+                indices[i][4] = zahlen_liste[i].find('e')
+                if test_e_minus[i]:
+                    indices[i][5] = zahlen_liste[i].find('e-') + 1
+                    indices[i][6] = indices[i][5] + 1
+                else: 
+                    indices[i][5:7] = [indices[i][4] + 1] * 2
+            else:
+                indices[i][4:7] = [indices[i][7]] * 3
+            if test_komma[i]:
+                indices[i][2] = zahlen_liste[i].find('.')
+                indices[i][3] = indices[i][2] + 1
+            else:
+                indices[i][2:4] = [indices[i][4]] * 2
+            if test_minus[i]:
+                indices[i][1] = 1
+            else:
+                indices[i][1] = 0
+
+        längen = (indices.T[1:] - indices.T[:-1]).T
+        längen_max = np.max(längen, axis = 0)
+        längen_diff = längen_max[np.newaxis:] - längen
+
+        längen_auswahl = [7, 6, 5, 4, 3, 2, 1, 0]
+        indices_auswahl = [7, 5, 5, 4, 4, 2, 0, 0]   #% auf jeden Fall kommentieren.
+        for i in range(länge_abs):
+            for j in range(len(längen_auswahl)):
+                zahlen_liste[i] = _füllen(zahlen_liste[i], menge = längen_diff[i][längen_auswahl[j]], 
+                                          index = indices[i][indices_auswahl[j]])
+    
+        test_leerzeichen = [' ' in string[0] for string in zahlen_liste]
+        test_e_leer      = ['e ' in string if 'e' in string else True for string in zahlen_liste]
+        if all(test_leerzeichen):
+            for i in range(länge_abs):
+                zahlen_liste[i] = zahlen_liste[i][1:]
+        if all(test_e_leer) and any(test_e):
+            index_e_string = test_e.index(True)
+            index_nach_e   = zahlen_liste[index_e_string].index('e') + 1
+            zahlen_liste = [_entfernen(string, index_nach_e) for string in zahlen_liste]
+        
+        länge_gesamt = len(zahlen_liste[0])
+    else:
+        länge_gesamt = max([len(string) for i, string in nicht_zahlen])
+    for tupel in nicht_zahlen:
+        zahlen_liste.insert(tupel[0], _zentrieren_rechts(tupel[1], länge_gesamt))
+    
+    return zahlen_liste
+
+
+
+
+def _plus_minus(string_liste):
+    plus_minus = []
+    for i in range(len(string_liste)):
+        if string_liste[i] == '':
+            plus_minus.append('')
+        elif all([zeichen == ' ' for zeichen in string_liste[i]]):
+            plus_minus.append('   ')
+        else:
+            plus_minus.append(' ± ')
+    return plus_minus
     
 
     
