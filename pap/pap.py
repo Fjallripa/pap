@@ -21,7 +21,8 @@ ZIFFERN = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 # Fehlerrechnung
 
 def summen_fehler(fehler_array):
-    '''Quadratische Addition der Fehler einer Summe
+    '''
+    Quadratische Addition der Fehler einer Summe
     
     Die Form dieser Summe soll sein  wert1 + wert2 + ... + wertn.
     fehler_array soll eine Form haben wie  [fehler_wert1, ..., fehler_wertn].
@@ -33,7 +34,8 @@ def summen_fehler(fehler_array):
 
 
 def produkt_fehler(produkt, rel_fehler_array):
-    '''Quadratische Addition der relativen Fehler eines Produktes (optional inkl. Potenzen)
+    '''
+    Quadratische Addition der relativen Fehler eines Produktes (optional inkl. Potenzen)
     
     Die Form dieses Produktes soll sein  wert1**n1 * wert2**n2 * ... * wertn**nn.
     fehler_array soll eine Form haben wie  [relativer_fehler_wert1, ..., relativer_fehler_wertn]
@@ -49,7 +51,8 @@ def produkt_fehler(produkt, rel_fehler_array):
 
 
 def std(*args, **kwargs):
-    '''Experimenteller Fehler des Einzelwertes
+    '''
+    Experimenteller Fehler des Einzelwertes
     
     Die Funktion ist identisch zu np.std() inkl. aller Argumente, 
     außer dass ddof = 1 gesetzt wird wenn nicht spezifisch angegeben.
@@ -65,13 +68,45 @@ def std(*args, **kwargs):
 
 
 def mittel(*args, **kwargs):
-    '''Mittelwert
+    '''
+    Mittelwert
     
-    Die Funktion ist identisch zu np.std() inkl. aller Argumente
+    Die Funktion ist identisch zu np.mean() inkl. aller Argumente
     und dient nur besseren Lesbarkeit inmitten von anderen pap-Funktionen.
     '''
     
     return np.mean(*args, **kwargs)
+
+
+
+
+def mittel_fehler(*args, **kwargs):
+    '''
+    Experimenteller Fehler des Mittelwertes
+    
+    Die Funktion berechnet std(X) / sqrt(N) von einer Werteverteilung X mit N Werten.
+    Dabei ist std() = pap.std() also der Experimentelle Fehler des Einzelwertes.
+    Somit lassen sich genau die gleichen Argumente wie in np.std() einsetzen.
+    '''
+    
+    
+    werte = args[0]
+    shape = np.shape(werte)
+    if shape == (0,):   # Verhindert Fehlermeldung falls werte == []
+        return np.nan
+    
+    if 'axis' in kwargs and kwargs['axis'] != None:   
+        # Zweite Bedingung im if-Satz nötig, wenn man explizit axis = None angibt.
+        achsen        = kwargs['axis']
+        shape_rest    = (shape[achsen]  if type(achsen) == int  
+                         else arr([shape[i] for i in achsen]))
+        anzahl_zahlen = np.prod(shape_rest)
+    else:
+        anzahl_zahlen = np.product(shape)
+    
+    
+    fehler_des_mittelwertes = std(*args, **kwargs) / np.sqrt(anzahl_zahlen)
+    return fehler_des_mittelwertes
 
 
 
