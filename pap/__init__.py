@@ -1,5 +1,103 @@
 # Docstring des pap-Paketes
-'''Hi plup'''
+'''
+Dieses Python-Paket soll repetitive Aufgaben der Physikexperiment-Auswertungen im Studium schneller, 
+einfacher und schöner lösen als das manuell möglich wäre.  
+
+Aktuell lassen sich die Features in 5 Bereiche aufteilen:  
+* Fehlerrechnung
+* Einfache Statistik
+* Resultat-Darstellung und -Vergleich
+* Fits und Chi^2-Tests
+* Grundlegende Fitfunktionen
+
+Installationshinweise: Siehe how-to-make-import-pap-work.md im Ordner dieses Paketes.
+
+
+
+Übersicht der Bereiche
+----------------------
+Fehlerrechnung:
+    * pap.summen_fehler()  und  pap.produkt_fehler()
+        vereinfachen einem die gauß'sche Fehlerfortpflanzung.
+        Zur Berechnung muss man nur die benötigten Werte und Fehler einsetzen.
+        
+
+Einfache Statistik:
+    * pap.std() 
+        berechnet den Experimentellen Fehler des Einzelwertes
+        np.std() tut dies nämlich nicht, Näheres dazu im pap.std()-Docstring
+    
+    * pap.mittel()  und  pap.mittel_fehler()
+        entsprechen jeweils np.mean() und dem Experimentellen Fehler des Mittelwertes
+    
+    * pap.fwhm()
+        wandelt σ in FWHM bzw. Halbwertsbreite um
+
+
+Resultat-Darstellung und Vergleich:
+    * pap.resultat()
+        printet ein schön formatiertes Ergebnis mit 
+        Titel, definierter Präzision, evt. +/- Fehler, Einheit und evt. relativen Fehler.
+        
+        Beispiel:
+        >>> pap.resultat('Arbeit', np.array([3.3520e6, 0.4684e6]), 'MJ', faktor = 1e-6)
+          Arbeit: 3.4 +/- 0.5 MJ
+          
+    * pap.vergleichstabelle()
+        printet einen wissenschaftlichen Vergleich von fehlerbehafteten experimentellen und 
+        theoretischen Werten in Tabellenform. 
+         - Absolute, relative und sigma-Abweichung werden berechnet.
+         - Die Werte sind nach Größenordnung ausgerichtet und wissenschaftlich gerundet.
+         - Darstellung der Vergleiche als Blöcke oder als Liste möglich.
+         - Robust gegen Extremfälle und fehlende Werte.
+        
+        Beispiel:
+        >>> titel  = 'Literaturvergleich Fallbeschleunigung'
+        >>> werte  = np.array([[3.446, 0.00204], [0.105, 0.00045], [3.69, 0], [5e-3, 0]])
+        >>> größen = ['Boden', 'Orbit']
+        >>> vergleichstabelle(werte, titel, einheit = 'm/s^2', größen = größen, 
+                              beschreibung = 'knapp')
+          Literaturvergleich Fallbeschleunigung
+
+           [m/s^2]       Boden             Orbit     
+          --------   --------------   ---------------
+          Wert exp    3.45  ± 0.10    0.0020 ± 0.0004
+               the    3.690 ± 0.005   0.0    ± 0.0   
+          Abw. abs   -0.24  ± 0.11    0.0020 ± 0.0004
+               rel       -6.6 %              -       
+               sig        2.3 σ            4.5 σ      
+
+        
+Fits und Chi^2-Tests:
+    * pap.odr_fit()
+        fittet Funktionen ähnlich wie Scipys curve_fit() nur mit Berücksichtigung des x-Fehlers, 
+        was wichtig wird, wenn dieser der dominante Fehler ist. 
+        Diese Funktion benutzt direkt Scipys odr-Paket, ist aber wesentlich einfacher 
+        zu bedienen.
+    
+    * pap.chi_quadrat_test()  und  pap.chi_quadrat_odr()
+        führen einen χ^2-Test zu Bestimmung der Güte des Fits durch.
+        Erstere nimmt die Ergebnisse von scipys curve_fit() auf, während zweitere die von 
+        pap.odr_fit() benutzt und damit auch den x-Fehler berücksichtigt.
+        
+        Beispiel: (für Orignal-Werte, siehe den pap.chi_quadrat_test()-Docstring)
+        >>> pap.chi_quadrat_test(pap.func.quad(x_werte, *fitparameter), y_werte, y_fehler, 3)
+          Ergebnisse des χ^2-Tests:
+
+          χ^2_reduziert         = 2.79
+          Fitwahrscheinlichkeit = 2.5%
+          
+        
+Grundlegende Fitfunktionen:
+    (mehr Infos im Docstring von pap.func)
+    * pap.func.konst()  - Konstante Funktion
+    * pap.func.prop()   - Proportionale Funktion
+    * pap.func.lin()    - Lineare Funktion
+    * pap.func.quad()   - Quadratische Funktion
+    * pap.func.poly()   - allgemeines Polynom
+    * pap.func.exp()    - Exponentialfunktion
+    * pap.func.gauss()  - Gaußverteilung
+'''
 
 
 
@@ -12,7 +110,6 @@ import numpy as np
 from numpy import array as arr
 from scipy.stats import chi2
 from scipy import odr
-from tabulate import tabulate
 
 from pap import func   # Ermöglicht es, direkt pap.func-Funktionen zu nutzen wenn nur `import pap` ausgeführt wurde.
 
@@ -1710,3 +1807,11 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
     
     
     _chi_quadrat_print(chi_quadrat, anzahl_messwerte, anzahl_parameter)
+
+
+
+
+    
+
+# Entfernen von importierten Funktionen, die nicht den help(pap)-Text zuspammen sollen.
+del arr

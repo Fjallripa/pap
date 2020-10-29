@@ -1,5 +1,31 @@
 # Docstring des func-Moduls
-''''''
+'''
+Dieses Modul enthält ein paar grundlegende mathematische Funktionen, die dazu gedacht sind als 
+Fit-Funktionen eingesetzt zu werden. 
+
+Die Argumente haben die Struktur pap.func.blabla(x, *jeweilige_parameter) wobei x 
+auch ein numpy-Array an x-Werten sein kann. Der Output besteht immer aus dem jeweiligen 
+Funktionswert (bzw. Array von Werten).
+
+
+
+Übersicht der Funktionen
+------------------------
+* pap.func.konst()   Konstante Funktion       f(x) = c
+    
+* pap.func.prop()    Proportionale Funktion   f(x) = ax
+    
+* pap.func.lin()     Lineare Funktion         f(x) = ax + b
+    
+* pap.func.quad()    Quadratische Funktion    f(x) = ax^2 + bx + c
+    
+* pap.func.poly()    allgemeines Polynom      f(x) = a_n x^n + a_{n-1} x^{n-1} + ... + a_0 x^0
+    
+
+* pap.func.exp()     Exponentialfunktion      f(x) = A*e^(λx)
+
+* pap.func.gauss()   Gaußverteilung           f(x) = A / (sqrt(2π)σ) * exp(-(x - μ)^2 / (2σ^2))
+'''
 
 
 
@@ -18,7 +44,7 @@ from numpy import array as arr
 
 # Einfache mathematische Funktionen
 
-def const(x, c):
+def konst(x, c):
     '''
     Konstante Funktion:
     f(x) = c
