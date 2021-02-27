@@ -125,3 +125,13 @@ def gauss(x, A0, mu, sigma):
     '''
     
     return A0 / (np.sqrt(2 * np.pi) *  sigma) * np.exp(-(x - mu)**2 / 2 / sigma**2)
+
+
+
+
+
+
+# Entfernen von importierten Funktionen und Paketen, die nicht den help(pap)-Text zuspammen sollen.
+del arr
+
+del np

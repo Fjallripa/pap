@@ -70,14 +70,14 @@ Resultat-Darstellung und Vergleich:
         
 Fits und Chi^2-Tests:
     * pap.odr_fit()
-        fittet Funktionen ähnlich wie Scipys curve_fit() nur mit Berücksichtigung des x-Fehlers, 
+        fittet Funktionen ähnlich wie SciPys curve_fit() nur mit Berücksichtigung des x-Fehlers, 
         was wichtig wird, wenn dieser der dominante Fehler ist. 
-        Diese Funktion benutzt direkt Scipys odr-Paket, ist aber wesentlich einfacher 
+        Diese Funktion benutzt direkt SciPys odr-Paket, ist aber wesentlich einfacher 
         zu bedienen.
     
     * pap.chi_quadrat_test()  und  pap.chi_quadrat_odr()
         führen einen χ^2-Test zu Bestimmung der Güte des Fits durch.
-        Erstere nimmt die Ergebnisse von scipys curve_fit() auf, während zweitere die von 
+        Erstere nimmt die Ergebnisse von SciPys curve_fit() auf, während zweitere die von 
         pap.odr_fit() benutzt und damit auch den x-Fehler berücksichtigt.
         
         Beispiel: (für Orignal-Werte, siehe den pap.chi_quadrat_test()-Docstring)
@@ -1127,7 +1127,7 @@ def vergleichstabelle(werte, titel = '', einheit = '', größen = '', faktor = 1
     * gerundet wird mit Pythons round()
     * Im Gegensatz zum Schulrunden wird bei 5 nicht immer aufgerundet sondern zur nächsten geraden Zahl.
     * Bsp.: 10.5 -> 10,  11.5 -> 12,    2.5 -> 2,  3.5 -> 4
-    * Beim Runden von vielen Zahlen reduziert dies den statistischen Fehler, der durchs Runden entsteht.
+    * Beim Runden von vielen Zahlen reduziert dies den systematischen Fehler, der durchs Runden entsteht.
     
     Gerundet wird nach der Größe des Fehlers:
     * Dieser wird auf eine signifikante Stelle gerundet, wenn die erste Ziffer größer als 3 ist.
@@ -1813,5 +1813,9 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
 
     
 
-# Entfernen von importierten Funktionen, die nicht den help(pap)-Text zuspammen sollen.
+# Entfernen von importierten Funktionen und Paketen, die nicht den help(pap)-Text zuspammen sollen.
 del arr
+del chi2
+
+del np
+del odr

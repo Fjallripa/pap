@@ -1,4 +1,4 @@
-# experiment-code
+# pap-Paket
 **Übersicht:**
 * Was wird in diesem Projekt gemacht?
 * Übersicht der Features und Funktionen
@@ -8,7 +8,8 @@
 
 ## Was wird in diesem Projekt gemacht?
 Hier wird ein Python-Paket `pap` entwickelt, das repetitive Aufgaben der Physikexperiment-Auswertungen im Studium schneller, einfacher und schöner löst als es manuell möglich wäre.
-Im Zuge der Entwicklung wird das Paket um neue Funktionen ergänzt und alte Funktionen flexibler/kraftvoller gemacht.
+Im Zuge der Entwicklung wird das Paket um neue Funktionen ergänzt und alte Funktionen flexibler/kraftvoller gemacht.  
+Ideen, Feedback und Beiträge sind höchst willkommen.
 
 
 
@@ -24,14 +25,14 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
 ### Übersicht der Bereiche
 #### Fehlerrechnung:
 * `pap.summen_fehler()` und `pap.produkt_fehler()`
-    vereinfachen einem die gauß'sche Fehlerfortpflanzung.
+    vereinfachen einem die gauß'sche Fehlerfortpflanzung.  
     Zur Berechnung muss man nur die benötigten Werte und Fehler einsetzen.
         
 
 #### Einfache Statistik:
 * `pap.std()`
-    berechnet den Experimentellen Fehler des Einzelwertes
-    np.std() tut dies nämlich nicht, Näheres dazu im pap.std()-Docstring
+    berechnet den Experimentellen Fehler des Einzelwertes.  
+    np.std() tut dies nämlich nicht, näheres dazu im pap.std()-Docstring
 * `pap.mittel()`  und  `pap.mittel_fehler()`
     entsprechen jeweils np.mean() und dem Experimentellen Fehler des Mittelwertes
 * `pap.fwhm()`
@@ -45,8 +46,8 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
     
     Beispiel:
     ```
-    >>> pap.resultat('Arbeit', np.array([3.3520e6, 0.4684e6]), 'MJ', faktor = 1e-6
-      Arbeit: 3.4 +/- 0.5 M
+    >>> pap.resultat('Arbeit', np.array([3.3520e6, 0.4684e6]), 'MJ', faktor = 1e-6)
+      Arbeit: 3.4 +/- 0.5 MJ
     ```
     
 * `pap.vergleichstabelle()`
@@ -59,8 +60,8 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
     
     Beispiel:
     ```
-    >>> titel  = 'Literaturvergleich Fallbeschleunigung
-    >>> werte  = np.array([[3.446, 0.00204], [0.105, 0.00045], [3.69, 0], [5e-3, 0]]
+    >>> titel  = 'Literaturvergleich Fallbeschleunigung'
+    >>> werte  = np.array([[3.446, 0.00204], [0.105, 0.00045], [3.69, 0], [5e-3, 0]])
     >>> größen = ['Boden', 'Orbit']
     >>> vergleichstabelle(werte, titel, einheit = 'm/s^2', größen = größen, 
                           beschreibung = 'knapp')
@@ -78,14 +79,14 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
 
 #### Fits und Chi^2-Tests:
 * `pap.odr_fit()`
-    fittet Funktionen ähnlich wie Scipys curve_fit() nur mit Berücksichtigung des x-Fehlers, 
+    fittet Funktionen ähnlich wie SciPys curve_fit() nur mit Berücksichtigung des x-Fehlers, 
     was wichtig wird, wenn dieser der dominante Fehler ist. 
-    Diese Funktion benutzt direkt Scipys odr-Paket, ist aber wesentlich einfacher 
+    Diese Funktion benutzt direkt SciPys odr-Paket, ist aber wesentlich einfacher 
     zu bedienen.
 
 * `pap.chi_quadrat_test()` und  `pap.chi_quadrat_odr()`
     führen einen χ^2-Test zu Bestimmung der Güte des Fits durch.
-    Erstere nimmt die Ergebnisse von scipys curve_fit() auf, während zweitere die von 
+    Erstere nimmt die Ergebnisse von SciPys curve_fit() auf, während zweitere die von 
     pap.odr_fit() benutzt und damit auch den x-Fehler berücksichtigt.
 
     Beispiel: (für Orignal-Werte, siehe den pap.chi_quadrat_test()-Docstring)
@@ -111,7 +112,7 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
 
 
 ## Installieren des Pakets
-Dieses Paket ist noch kein allgemeinzugängliches Python-Paket, deshalb muss es manuell von GitHub (https://github.com/Fjallripa/experiment-code) heruntergeladen werden (nur der Ordner `pap` ist notwendig).  
+Dieses Paket ist noch kein allgemeinzugängliches Python-Paket, deshalb muss es manuell von GitHub (https://github.com/Fjallripa/pap) heruntergeladen werden (nur der Ordner `pap` ist notwendig).  
 
 Wenn du es direkt benutzen willst, kannst du es in den gleichen Ordner wie dein Jupyter-Notebook bzw. Python-Skript speichern.  
 Wenn du aber nicht für jede neue Datei den `pap`-Ordner dorthin kopieren willst, damit `import pap` klappt, dann gibt es für Jupyter-Notebook-Benutzer eine detaillierte Anleitung unter `pap/how-to-make-import-pap-work.md`. Skript- und Interpreter-Benutzer können ihren Dateipfad für `pap` PYTHONPATH hinzufügen (wie, kann leicht gegoogelt werden).
