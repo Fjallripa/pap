@@ -47,9 +47,11 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
     Titel, definierter Präzision, evt. +/- Fehler, Einheit und evt. relativen Fehler.
     
     Beispiel:
-    ```
+    ```python
     >>> pap.resultat('Arbeit', np.array([3.3520e6, 0.4684e6]), 'MJ', faktor = 1e-6)
-      Arbeit: 3.4 +/- 0.5 MJ
+    ```
+    ```
+    Arbeit: 3.4 +/- 0.5 MJ
     ```
     
 * `pap.vergleichstabelle()`
@@ -61,21 +63,23 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
      - Robust gegen Extremfälle und fehlende Werte.
     
     Beispiel:
-    ```
+    ```python
     >>> titel  = 'Literaturvergleich Fallbeschleunigung'
     >>> werte  = np.array([[3.446, 0.00204], [0.105, 0.00045], [3.69, 0], [5e-3, 0]])
     >>> größen = ['Boden', 'Orbit']
     >>> vergleichstabelle(werte, titel, einheit = 'm/s^2', größen = größen, 
                           beschreibung = 'knapp')
-      Literaturvergleich Fallbeschleunigung
+    ```
+    ```
+    Literaturvergleich Fallbeschleunigung
 
-       [m/s^2]       Boden             Orbit     
-      --------   --------------   ---------------
-      Wert exp    3.45  ± 0.10    0.0020 ± 0.0004
-           the    3.690 ± 0.005   0.0    ± 0.0   
-      Abw. abs   -0.24  ± 0.11    0.0020 ± 0.0004
-           rel       -6.6 %              -       
-           sig        2.3 σ            4.5 σ      
+     [m/s^2]       Boden             Orbit     
+    --------   --------------   ---------------
+    Wert exp    3.45  ± 0.10    0.0020 ± 0.0004
+         the    3.690 ± 0.005   0.0    ± 0.0   
+    Abw. abs   -0.24  ± 0.11    0.0020 ± 0.0004
+         rel       -6.6 %              -       
+         sig        2.3 σ            4.5 σ      
     ```
 
 
@@ -92,12 +96,14 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
     pap.odr_fit() benutzt und damit auch den x-Fehler berücksichtigt.
 
     Beispiel: (für Orignal-Werte, siehe den pap.chi_quadrat_test()-Docstring)
-    ```
+    ```python
     >>> pap.chi_quadrat_test(pap.func.quad(x_werte, *fitparameter), y_werte, y_fehler, 3)
-      Ergebnisse des χ^2-Tests:
+    ```
+    ```
+    Ergebnisse des χ^2-Tests:
 
-      χ^2_reduziert         = 2.79
-      Fitwahrscheinlichkeit = 2.5%
+    χ^2_reduziert         = 2.79
+    Fitwahrscheinlichkeit = 2.5%
     ```
  
 
@@ -117,10 +123,10 @@ Aktuell lassen sich die Features in 5 Bereiche aufteilen:
 Dieses Paket ist noch kein allgemeinzugängliches Python-Paket, deshalb muss es manuell von GitHub (https://github.com/Fjallripa/pap) heruntergeladen werden (nur der Ordner `pap` ist notwendig).  
 
 Wenn du es direkt benutzen willst, kannst du es in den gleichen Ordner wie dein Jupyter-Notebook bzw. Python-Skript speichern.  
-Wenn du aber nicht für jede neue Datei den `pap`-Ordner dorthin kopieren willst, damit `import pap` klappt, dann gibt es für Jupyter-Notebook-Benutzer eine detaillierte Anleitung unter `pap/how-to-make-import-pap-work.md`. Skript- und Interpreter-Benutzer können ihren Dateipfad für `pap` PYTHONPATH hinzufügen (wie, kann leicht gegoogelt werden).
+Wenn du aber nicht für jede neue Datei den `pap`-Ordner dorthin kopieren willst, damit `import pap` klappt, dann gibt es für Jupyter-Notebook-Benutzer eine detaillierte Anleitung unter [Installationsanleitung](https://github.com/Fjallripa/pap/wiki/Installationsanleitung). Skript- und Interpreter-Benutzer können ihren Dateipfad für `pap` PYTHONPATH hinzufügen (wie, kann leicht gegoogelt werden).
 
 Danach sollte `pap` problemlos zu benutzen sein:
-```
+```python
 import pap
 
 # Infos zum Paket/Modul. Gibt eine Übersicht der Funktionen. Auch alle deren Docstrings sind aufgelistet.
