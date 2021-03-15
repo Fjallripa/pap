@@ -11,6 +11,8 @@ Hier wird ein Python-Paket `pap` entwickelt, das repetitive Aufgaben der Physike
 Im Zuge der Entwicklung wird das Paket um neue Funktionen ergänzt und alte Funktionen flexibler/kraftvoller gemacht.  
 Ideen, Feedback und Beiträge sind höchst willkommen.
 
+Für eine detailliertere Dokumentation, siehe das ![pap-Wiki](github.com/Fjallripa/pap.wiki/Home.md).
+
 
 
 ## Übersicht der Features und Funktionen

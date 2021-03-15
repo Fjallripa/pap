@@ -150,7 +150,7 @@ def produkt_fehler(produkt, rel_fehler_array):
     fehler_array soll eine Form haben wie  [relativer_fehler_wert1, ..., relativer_fehler_wertn]
     mit  relativer_fehler_wert1 = n1 * fehler_wert1 / wert1,  wobei  n1  dessen Potenz ist.
     
-    Wenn produkt = 1 gewählt wird, erhält man den relativen Fehler
+    Wenn produkt = 1 gewählt wird, erhält man den relativen Fehler.
     '''
     
     relativer_fehler = np.linalg.norm(rel_fehler_array, axis = 0)
@@ -170,7 +170,7 @@ def std(*args, **kwargs):
     Die Funktion ist identisch zu np.std() inkl. aller Argumente, 
     außer dass ddof = 1 gesetzt wird wenn nicht spezifisch angegeben.
     Wenn σ die Varianz einer Werteverteilung X mit N Werten ist, dann wird also im Normalfall berechnet
-    std = sqrt(σ(X) / (N - 1))
+    std = sqrt(σ(X) / (N - 1)).
     '''
     
     if not ('ddof' in kwargs):
@@ -226,7 +226,7 @@ def mittel_fehler(*args, **kwargs):
 
 def fwhm(sigma):
     '''
-    Halbwertsbreite:
+    Halbwertsbreite (Full Width Half Mean):
     FWHM = 2 sqrt(2 ln(2)) * σ
     '''
     
@@ -418,7 +418,7 @@ def _nachkommastelle(zahlen, sig_stellen = 1, sig_grenze = 1.0):
         Nur Zahlen >= 1 sinnvoll
     
     sig_grenze : int, float, optional
-        Nur Zahlen >= 1 und < 10 sinvoll
+        Nur Zahlen >= 1 und < 10 sinnvoll
     
     
     Output
@@ -430,7 +430,7 @@ def _nachkommastelle(zahlen, sig_stellen = 1, sig_grenze = 1.0):
     Berechnung
     ----------
     Rundet man eine Zahl wissenschaftlich, dann will man sie auf eine bestimmte Anzahl signifikanter Stellen 
-    runden, zB. bei Fehlerwerten auf oft nur eine: 1.389342 -> 1
+    runden, zB. bei Fehlerwerten auf oft nur eine: 1.389342 -> 1.
     Stur auf eine signifikante Stelle zu runden wird aber bei Zahlen mit kleinen ersten Ziffern problematisch
     wie in oberem Beispiel. Der gerundete Wert könnte zwischen 0.5 und 1.5 liegen, wodurch man einen unnötig 
     großen Darstellungsfehler introduziert.
@@ -438,7 +438,7 @@ def _nachkommastelle(zahlen, sig_stellen = 1, sig_grenze = 1.0):
     rundenden Wertes kleiner als diese Grenze, wird der Wert mit einer signifikanten Stelle mehr gerundet.
     
     Beispiel 1: Sei die Signifikanzgrenze sig_grenze = 4 (Darstellungsfehler max. 1/8)
-                und die normale Anzahl signifikanter Stellen sig_stellen = 1
+                und die normale Anzahl signifikanter Stellen sig_stellen = 1.
     0.002458 -> 0.0025 (nachkommastelle =  4)
     828.003  -> 800    (nachkommastelle = -2)
     4.001    -> 4      (nachkommastelle =  0)
@@ -530,7 +530,7 @@ def _listen_transponieren(listen_matrix):
 def _füllen(string, index = 0,  menge = 1, füllzeichen = ' '):
     '''
     fügt eine bestimmte Menge an Füllzeichen an eine bestimmte Position eines Strings.
-    Ähnlich zu einem .format()-Feature wo der String eine festgelegte Breite haben soll und mit entsprechend
+    Ähnlich zu Pythons .format()-Methode, wo der String eine festgelegte Breite haben soll und mit entsprechend
     vielen Füllzeichen aufgefüllt wird. Hier kann man stattdessen die Anzahl der Füllzeichen festlegen und auch
     die genaue Einsetz-Position.
     
@@ -541,7 +541,7 @@ def _füllen(string, index = 0,  menge = 1, füllzeichen = ' '):
     
     index : int, str, optional
         Position im string, wo die füllzeichen eingefügt werden sollen
-        Wenn type(index) = str, dann darf index nur sein:
+        Wenn type(index) == str, dann darf index nur sein:
         index = 'links'    (= 0) -> füllzeichen ganz links einfügen
         
         index = 'rechts'   (= len(string)) -> füllzeichen ganz rechts einfügen
@@ -642,7 +642,7 @@ def _zahlen_ausrichtung(zahlen_liste):
     zahlen_liste : list  (str)
         Unterstützte Arten von Strings sind:
         * int- und float-Strings (auch mit 'e')
-        * solche strings mit einem Leerzeichen und Einheit hinten dran (zB. '1.4e-3 %')
+        * solche Strings mit einem Leerzeichen und Einheit hinten dran (zB. '1.4e-3 %')
         * einzelne Zeichen (zB. '-')
         * leere Strings
         
@@ -789,7 +789,8 @@ def _zahlen_ausrichtung(zahlen_liste):
 
 
 def _plus_minus(string_liste):
-    '''entscheidet, welche Strings in einer Liste von Strings mit einem Plus-Minus-Zeichen versehen werden 
+    '''
+    entscheidet, welche Strings in einer Liste von Strings mit einem Plus-Minus-Zeichen versehen werden 
     sollen und welche nicht. Diese Funktion ergibt nur als direkte Hilfsfunktion von pap.vergleichstabelle()
     Sinn.
     
@@ -982,10 +983,10 @@ def vergleichstabelle(werte, titel = '', einheit = '', größen = '', faktor = 1
     Tabellenform. 
     Berechnet und angezeigt werden zusätzlich absolute und relative sowie sigma-Abweichungen.
     Die Werte sind zur besseren Vergleichbarkeit in ±-Darstellung, nach Komma und Exponent ausgerichten als auch 
-    gerundet entsprechend der Größe ihrer Fehler (siehe "Berechnung und Rundung")
+    gerundet entsprechend der Größe ihrer Fehler (siehe "Berechnung und Rundung").
     
     Die Vergleiche können sowohl nebeneinander als 'blöcke' dargestellt werden als auch untereinander als 'liste'.
-    Einheit sowie Überschriften der einzeln Vergleiche (größen) können auch angegeben werden.
+    Einheit sowie Überschriften der einzelnen Vergleiche (größen) können auch angegeben werden.
     Randfälle sowie "div-by-0"-Probleme und fehlende Werte (None) werden automatisch hantiert.
     Ein Überblick der Darstellungsoptionen ist in "Beispiele" zu finden.
     
@@ -1001,7 +1002,7 @@ def vergleichstabelle(werte, titel = '', einheit = '', größen = '', faktor = 1
         
         Art der Werte:
         Die Elemene dürfen reellwertige Zahlen sein (int, bool oder numpy-Äquivalente) oder None sein.
-        Ein Fehler-Wert, der None ist, wird als 0 interpretiert. Ein ex-/theo-Wert der None ist, wird als fehlende Zahl 
+        Ein Fehler-Wert, der None ist, wird als 0 interpretiert. Ein ex-/theo_wert der None ist, wird als fehlende Zahl 
         interpretiert und es wird kein Vergleich durchgeführt, siehe "Beispiele".
         
     titel : str, optional
@@ -1016,13 +1017,13 @@ def vergleichstabelle(werte, titel = '', einheit = '', größen = '', faktor = 1
         Darf folgende Formen haben:
         * str                   - einzelne Überschrift
         * Liste bis Länge N     - bis zu eine Überschrift für jeden Vergleich. Bei weniger Überschriften 
-                                  bekommen die letzten Vergleiche keine Überschrift
+                                  bekommen die letzten Vergleiche keine Überschrift.
         * Liste von Länge N + 1 - nur möglich, wenn einheit nicht angegeben. Erster String der Liste 
                                   ersetzt einheit und die Kennzeichnung 'Einheit' bzw. '[...]'. Die 
                                   restlichen Strings sind die jeweiligen Vergleichsüberschriften.
     
     faktor : number_like, optional
-        wird multipliziert mit allen Werten. Falls die angegebene Einheit (oder Größenordnung), nicht die ist in der 
+        wird multipliziert mit allen Werten. Falls die angegebene Einheit (oder Größenordnung) nicht die ist, in der 
         gerechnet wurde.
     
     ausrichtung : str, optional
@@ -1664,7 +1665,7 @@ def odr_fit(funktion, messpunkte, messfehler, parameter0,
       * "Reason(s) for Halting" kann Gründe angeben, warum ein Fit schiefgelaufen ist. 
         "Sum of squares convergence" bedeutet, dass die Optimierfunktion auf einen bestimmten Wert 
         konvergiert ist. Bedeutet aber nicht notwendigerweise, dass die die gefunden Parameter sinnvoll 
-        sind, dies sieht man besser mit einem Plot
+        sind, dies sieht man besser mit einem Plot.
     '''
     
     
@@ -1744,13 +1745,13 @@ def chi_quadrat_test(fit_werte, werte, werte_fehler, anzahl_parameter):
     
     Argumente
     ---------
-    fit_werte: np.array (1D, number_like)
+    fit_werte : np.array (1D, number_like)
         die Werte, die die Fitfunktion ausgibt, also  fit_werte = fit_func(x_werte, *parameter)
     
-    werte: np.array (1D, number_like)
+    werte : np.array (1D, number_like)
         y-Werte der Messdaten
     
-    werte_fehler: np.array (1D, number_like)
+    werte_fehler : np.array (1D, number_like)
         y-Fehler der Messdaten
     
     anzahl_parameter : int (> 0)
@@ -1797,12 +1798,12 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
     Beispiel
     --------
     >>> parameter, parameter_fehler, chi_test_liste = pap.odr_fit(... Argumente ..., output_chi_liste = True)
-    ... Geprintetes Ergebnis vom ODR-Fit ...
+      ... Geprintetes Ergebnis vom ODR-Fit ...
     >>> pap.chi_quadrat_ord(*chi_test_liste)
-    Ergebnisse des χ^2-Tests:
-    
-    χ^2_reduziert         = 0.82
-    Fitwahrscheinlichkeit = 44.0%
+      Ergebnisse des χ^2-Tests:
+      
+      χ^2_reduziert         = 0.82
+      Fitwahrscheinlichkeit = 44.0%
     '''
     
     
