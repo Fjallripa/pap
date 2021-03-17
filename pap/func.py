@@ -3,7 +3,7 @@
 Dieses Modul enthält ein paar grundlegende mathematische Funktionen, die dazu gedacht sind als 
 Fit-Funktionen eingesetzt zu werden. 
 
-Die Argumente haben die Struktur pap.func.blabla(x, *jeweilige_parameter) wobei x 
+Die Argumente haben die Struktur pap.func.blabla(x, *jeweilige_parameter), wobei x 
 auch ein numpy-Array an x-Werten sein kann. Der Output besteht immer aus dem jeweiligen 
 Funktionswert (bzw. Array von Werten).
 

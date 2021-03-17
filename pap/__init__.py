@@ -1799,7 +1799,7 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
     --------
     >>> parameter, parameter_fehler, chi_test_liste = pap.odr_fit(... Argumente ..., output_chi_liste = True)
       ... Geprintetes Ergebnis vom ODR-Fit ...
-    >>> pap.chi_quadrat_ord(*chi_test_liste)
+    >>> pap.chi_quadrat_odr(*chi_test_liste)
       Ergebnisse des χ^2-Tests:
       
       χ^2_reduziert         = 0.82
