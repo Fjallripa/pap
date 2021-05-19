@@ -1,11 +1,11 @@
 # Installationsanleitung
 
-Dieses Paket ist noch kein allgemeinzugängliches Python-Paket, deshalb muss es manuell von GitHub (https://github.com/Fjallripa/pap) heruntergeladen werden (nur der Ordner `pap/pap` ist notwendig).  
+Dieses Paket ist noch kein allgemeinzugängliches Python-Paket, deshalb muss es manuell von GitHub (https://github.com/Fjallripa/pap) heruntergeladen werden (nur der Unterordner `pap` ist notwendig).  
 
 
 
 ## Sofort benutzen
-Wenn du es direkt benutzen willst, kannst du den Ordner `pap/pap` in den gleichen Ordner wie dein Jupyter-Notebook bzw. Python-Skript speichern.  
+Wenn du es direkt benutzen willst, kannst du den `pap`-Unterordner in den gleichen Ordner wie dein Jupyter-Notebook bzw. Python-Skript speichern.  
 
 #### Nachteil:  
 Schreibt man ein eigenes Paket mit Python-Funktionen wie hier `pap`, dann muss man es normalerweise im gleichen Ordner wie das Jupyter-Notebook haben, damit `import pap` klappt.  
@@ -13,10 +13,10 @@ Schreibt man ein eigenes Paket mit Python-Funktionen wie hier `pap`, dann muss m
 
 
 ## Benutzen mit `pap`-Ordner an nur einem Ort
-Will man aber nicht neben jedem Notebook Kopien des Pakets rumfliegen haben, sondern nur an einer Stelle (zB. im Ordner `/HOME/pap-paket`), dann kann man ins Notebook folgenden Code schreiben (mit gewünschtem Dateipfad): 
+Will man aber nicht neben jedem Notebook Kopien des Pakets rumfliegen haben, sondern nur an einer Stelle (zB. im Ordner `/HOME/Ordner-über-dem-pap-Ordner`), dann kann man ins Notebook folgenden Code schreiben (mit gewünschtem Dateipfad): 
 ```
 import sys
-sys.path.append('HOME/pap-paket')
+sys.path.append('HOME/Ordner-über-dem-pap-Ordner')
 ``` 
 Er sorgt dafür, dass Jupyter auch im gewünschten Dateipfad nach Python-Paketen sucht. 
 
@@ -41,12 +41,15 @@ Der hier präsentierte Weg sorgt dafür, dass Jupyter auch standardmäßig im ge
 Erstelle eine `own_pythonpath.py` Textdatei (Name egal) mit folgendem Code drin:  
 ```
 import sys
-sys.path.append('HOME/pap-paket')
+sys.path.append('HOME/Ordner-über-dem-pap-Ordner')
 ```  
 Ändere den Dateipfad im Code zu welchem Ordner auch immer du das Paket gespeichert hast und beachte, dass Windows für Dateipfade `\` statt `/`benutzt. Setze für `HOME` den entsprechenden Dateipfad deines Betriebssystems ein (siehe "Home-Verzeichnis" unten).
 
 2. 
-Bewege die Date in den Ordner `HOME/.ipython/profile_default/startup`. Möglicherweise musst du dafür dein Dateienprogramm dazu bringen versteckte Ordner und Dateien anzuzeigen (einfach nachgoogeln wie).
+Bewege die Datei in den Ordner `HOME/.ipython/profile_default/startup`. Möglicherweise musst du dafür dein Dateienprogramm dazu bringen versteckte Ordner und Dateien anzuzeigen (einfach nachgoogeln wie). 
+Falls du dies im jupyter.kip-Server tun willst, bewege die Datei mit "Move" und kopiere die Adresse `/.ipython/profile_default/startup` in die Zeile vom "Move"-Fenster.
+
+3. Jetzt Jupyter-Notebook neustarten und `import pap` ausführen.
 
 
 ### Erklärung
