@@ -1808,15 +1808,4 @@ def chi_quadrat_odr(chi_quadrat, anzahl_messwerte, anzahl_parameter):
     
     
     _chi_quadrat_print(chi_quadrat, anzahl_messwerte, anzahl_parameter)
-
-
-
-
-    
-
-# Entfernen von importierten Funktionen und Paketen, die nicht den help(pap)-Text zuspammen sollen.
-del arr
-del chi2
-
-del np
-del odr
+   
