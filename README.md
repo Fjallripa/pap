@@ -3,7 +3,7 @@
 **Übersicht:**
 * Was wird in diesem Projekt gemacht?
 * Übersicht der Features und Funktionen
-* Installieren des Pakets
+* [Installieren des Pakets](https://github.com/Fjallripa/pap#installieren-des-pakets)
 
 
 
